@@ -1,0 +1,61 @@
+plugins {
+    id 'java'
+}
+
+group = 'snake'
+version = '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_24
+    targetCompatibility = JavaVersion.VERSION_24
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.bouncycastle:bcpkix-jdk18on:1.86'
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+tasks.register('generateCa', JavaExec) {
+    group = 'application'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'j1.KeyServer'
+    workingDir = layout.projectDirectory
+    standardInput = System.in
+    doFirst {
+        setArgs(['--generate-ca'] + new ArrayList<String>(getArgs()))
+    }
+}
+
+tasks.register('runServer', JavaExec) {
+    group = 'application'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'j1.KeyServer'
+    workingDir = layout.projectDirectory
+}
+
+tasks.register('runClient', JavaExec) {
+    group = 'application'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'j1.KeyClient'
+    workingDir = layout.projectDirectory
+}
+
+tasks.register('printClasspath') {
+    dependsOn classes
+    doLast {
+        println(sourceSets.main.runtimeClasspath.asPath)
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
